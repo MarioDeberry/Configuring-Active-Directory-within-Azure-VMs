@@ -74,7 +74,7 @@ Logged back into the client machine with the admin user login and allowed domain
 <br />
 
 <p>
-<img src="https://github.com/chrisrraP/configure-ad/blob/main/Login%20as%20new%20user%20to%20server.png" height="80%" width="80%" alt="Disk Sanitization Steps"/>
+<img src="https://i.imgur.com/aQ1W5gf.jpeg" height="80%" width="80%" alt="Disk Sanitization Steps"/>
 </p>
 <p>
 Lastly, pick a random user from the OU and log into the client machine. 
