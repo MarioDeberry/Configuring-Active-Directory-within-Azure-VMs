@@ -2,8 +2,8 @@
 <img src="https://i.imgur.com/pU5A58S.png" alt="Microsoft Active Directory Logo"/>
 </p>
 
-<h1>Active Directory Deployed in the Cloud (Azure)</h1>
-This tutorial outlines the implementation of Active Directory within Azure Virtual Machines.<br />
+<h1>Configuring Active Directory (On-Premises) Within (Azure)</h1>
+This tutorial outlines the implementation of on-premises Active Directory within Azure Virtual Machines.<br />
 
 
 
@@ -27,56 +27,138 @@ This tutorial outlines the implementation of Active Directory within Azure Virtu
 - Connecting Virtual Machine to Cloud Server and Adding Users
 
 <h2>Deployment and Configuration Steps</h2>
-
-<p>
-<img src="https://github.com/MarioDeberry/Configuring-Active-Directory-within-Azure-VMs/blob/main/DC-1%20Static%20Address.png" height="80%" width="80%" alt="Disk Sanitization Steps"/>
-
-
-</p>
-<p>
-Within Azure, create two virtual machines. Select "Window Data server 2022" for the first operating system. You will also want to select "2 VCPUs". Meaning, two machines can be used in this session. The second VM will be "Windows 10".  The domain server will be named "DC-1" and the user will be named "Client". To ensure that the IP address of the server doesn't change throughout the process, select the "static" option in the network settings.
-</p>
 <br />
-
-<p>
-<img src="https://github.com/MarioDeberry/Configuring-Active-Directory-within-Azure-VMs/blob/main/DC-1%20Firewall%20Setup.png" height="80%" width="80%" alt="Disk Sanitization Steps"/>
-</p>
-<p>
-<img src="https://github.com/MarioDeberry/Configuring-Active-Directory-within-Azure-VMs/blob/main/DC-1%20Add%20Forest.png" height="80%" width="80%" alt="Disk Sanitization Steps"/>
-</p>
-<p>
-<img src="https://github.com/MarioDeberry/Configuring-Active-Directory-within-Azure-VMs/blob/main/DC-1%20Add%20User%20Role.png" height="80%" width="80%" alt="Disk Sanitization Steps"/>
-</p>
-Using remote desktop, log into the domain server. If you aren't familiar with remote desktop, watch this quick tutorial: https://www.youtube.com/watch?v=naUGaqqRA54. In the lower right search bar, type in "Firewall ". Select "Windows Defender Firewall With Advanced Security". Click on the "Protocols" section (Illustrated above). Right-click on ICMP Echo diagnostics and enable ICMPv4 TCP Protocols on Windows Firewall. Once connectivity is established between both machines, install Active Directory and add a domain. The machine restarts by default and log back in with the new domain create and the pre-existing username. Create Organizational Units (OU) and a couple of users. Give one of the users administrator properties by right-clicking on the user, selecting "properties", select "member" tab and add them to "Domain Admins" group. Click "check names" button after typing in "domain admins" to re-affirm the existence of the group name.
-</p>
+<h3 
 <br />
+<p>
+  
 
-<p>
-<img src="https://github.com/MarioDeberry/Configuring-Active-Directory-within-Azure-VMs/blob/main/Change%20Client%20one%20DNS%20Server.png" height="80%" width="80%" alt="Disk Sanitization Steps"/>
-</p>
-<p>
-<img src="https://github.com/MarioDeberry/Configuring-Active-Directory-within-Azure-VMs/blob/main/Confirm%20Client%20Server%20Changed.png" height="80%" width="80%" alt="Disk Sanitization Steps"/>
-</p>
-<p>
-Use the Microsoft Azure portal to change the DNS settings of the client machine to the server's private IP address (Illustrated above). Ensure connectivity and then log back into the server to verify that my "client" computer is listed in the "computers" container of the Active Directory domain root.
-</p>
-<br />
+### 1. Create the Domain Controller VM  
+- **Virtual Machine Name**: `DC-1`  
+- **Operating System**: Windows Server 2022  
+- **Network**: Create a new Resource Group and Virtual Network (VNet).  
+- **Configuration**: Use Azure's default settings for the VM size (e.g., 2 VCPUs).  
 
-<p>
-<img src="https://github.com/MarioDeberry/Configuring-Active-Directory-within-Azure-VMs/blob/main/Allow%20users%20server%20access.png" height="80%" width="80%" alt="Disk Sanitization Steps"/>
-</p>
-<p>
-<img src="https://github.com/MarioDeberry/Configuring-Active-Directory-within-Azure-VMs/blob/main/Generate%20Random%20Users.png" height="80%" width="80%" alt="Disk Sanitization Steps"/>
-</p>
-<p>
-Logged back into the client machine with the admin user login and allowed domain users access to remote desktop via system properties. Log out and log into the domain as the admin user. Using powershell as an administrator allows you to run a script that generates random users to the OU within Active Directory. You can also manually create more users.
-</p>
-<br />
+  
+![Resource Group](https://i.imgur.com/gaAzjvb.png)  
+![VM Configuration - Windows Server](https://i.imgur.com/hubTfey.png)  
 
-<p>
-<img src="https://i.imgur.com/aQ1W5gf.jpeg" height="80%" width="80%" alt="Disk Sanitization Steps"/>
+---
+
+### 2. Create the Client VM  
+- **Virtual Machine Name**: `Client-1`  
+- **Operating System**: Windows 10  
+- **Network**: Use the **same Resource Group and VNet** created in the previous step.  
+
+  
+![VM Configuration - Windows 10](https://i.imgur.com/XyEmv8f.png)  
+
+---
+
+### 3. Configure Static Private IP for the Domain Controller  
+- Navigate to the **Networking tab** of the Domain Controller VM in Azure.  
+- Set the **Network Interface Card (NIC)** private IP address to **Static** to ensure consistent connectivity.  
+
+
+![Static IP Configuration](https://i.imgur.com/KHU9kC4.png)  
+
+
+By following these steps, you will have a functioning Domain Controller (`DC-1`) and Client VM (`Client-1`) ready for further Active Directory configuration in a controlled Azure environment.
+
+
 </p>
 <p>
-Lastly, pick a random user from the OU and log into the client machine. 
-</p>
-<br />
+# Deploying Active Directory in Azure Virtual Machines  
+
+This guide outlines the steps to deploy a Domain Controller (Windows Server 2022) and a Client (Windows 10) within Microsoft Azure, configure their network settings, and set up Active Directory.
+
+---
+
+## Deployment Overview  
+
+### Virtual Machines Setup  
+- **Domain Controller (DC-1):**  
+  - Operating System: Windows Server 2022  
+  - Configuration: 2 VCPUs  
+  - Network: Assign a static IP in network settings.  
+
+- **Client (Client-1):**  
+  - Operating System: Windows 10  
+  - Network: Use the same resource group and VNet as DC-1.  
+
+---
+
+## Configuration Steps  
+
+### 1. Configure Windows Firewall for ICMP Protocols  
+- Log into DC-1 via **Remote Desktop**.  
+- Open **Windows Defender Firewall with Advanced Security**.  
+- Enable **ICMPv4 TCP Protocols** by modifying the "Protocols" section.  
+
+  
+![Firewall Setup](https://imgur.com/fxiahMT.png)  
+
+---
+
+### 2. Install and Configure Active Directory  
+- Install Active Directory Domain Services on DC-1.  
+- Create a new forest and domain.  
+- Restart the machine (automatically triggered by the installation).  
+
+  
+![Add Forest](https://imgur.com/39rEkhJ.png)  
+
+- Log back into DC-1 using the new domain and username.  
+- Set up **Organizational Units (OUs)** and create users.  
+
+---
+
+### 3. Assign Administrator Properties to a User  
+- Select a user in Active Directory.  
+- Right-click → Properties → Member tab.  
+- Add the user to the **Domain Admins** group by typing "domain admins" and clicking **Check Names**.  
+
+  
+![Add User Role](https://imgur.com/kzGVLjr.png)  
+
+---
+
+### 4. Update DNS Settings for Client-1  
+- Change the DNS settings of Client-1 to the **private IP address of DC-1** in Azure.  
+- Verify connectivity between Client-1 and DC-1.  
+- Confirm that Client-1 is listed in the "Computers" container of Active Directory.  
+
+ 
+![Change DNS Settings](https://imgur.com/G8LMrqB.png)  
+![Verify Connectivity](https://imgur.com/lQCfRDf.png)  
+
+---
+
+### 5. Enable Domain Users for Remote Desktop Access  
+- Log into Client-1 with the admin user.  
+- Allow **Domain Users** access to remote desktop via **System Properties**.  
+
+ 
+![Allow Users Access](https://imgur.com/TmSDbUU.png)  
+
+---
+
+### 6. Create Random Users in Active Directory  
+- Use **PowerShell as Administrator** to run a script generating random users in the OU.  
+- Alternatively, manually create users.  
+
+ 
+![Generate Users](https://imgur.com/H9Y3SMB.png)  
+
+---
+
+### 7. Test User Login  
+- Select a random user from the OU.  
+- Log into Client-1 using the user credentials.  
+
+ 
+![Login Test](https://i.imgur.com/aQ1W5gf.jpeg)  
+
+---
+
+By following these steps, you can deploy and configure Active Directory within Azure Virtual Machines, ensuring seamless communication and user management across your network.
